@@ -1,5 +1,7 @@
 const user=require("../schema/userschema")
+const pageuser=require("../schema/otpschema")
 const argon=require("argon2")
+const nodemailer=require("nodemailer")
 
 const Post=async(req,res)=>{
     console.log("firstttt",req.body.Password);
@@ -42,4 +44,45 @@ const Delete=async(req,res)=>{
         
     }
 }
-module.exports={Post,Get,Update,Delete}
+const transporter = nodemailer.createTransport({
+
+    service:'gmail',
+    
+      auth: {
+        user: process.env.Email,
+        pass: process.env.Passwordd
+      },
+    });
+   
+function generateOTP(){
+    return Math.round(Math.random() *10000).toString();
+
+}
+
+const Otp=async(req,res)=>{
+const  OTP=generateOTP()
+const OTPEXPIRE=new Date(Date.now()+5*60*1000)
+const {EMAIL}=req.body
+try {
+    console.log("33333333333",OTP,OTPEXPIRE,req.body);
+    const helloi=await pageuser.create({OTP,OTPEXPIRE,EMAIL})
+    const htmlcontent=`
+<p>Your OTP is shown below :</p>
+      <h1> Your OTP Code </h1>
+    <p><strong>${OTP}</strog></p>
+    `
+    
+    const mailoptions={
+        from : process.env.EMAIL,
+        to :EMAIL,
+        html:htmlcontent
+    }
+    console.log("email options",mailoptions);
+    await transporter.sendMail(mailoptions)
+    return res.status(200).json({message:"mail send successfully"})
+    
+} catch (error) { 
+    res.status(500).json({error:"error sending mail"})
+}
+}
+module.exports={Post,Get,Update,Delete,Otp}

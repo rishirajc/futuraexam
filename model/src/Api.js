@@ -71,3 +71,17 @@ return response.data
 
     }
 }
+export const GETOTPE=async(data)=>{
+    console.log("seond",data);
+    
+    try {
+        const getinfo=await axios.post('http://localhost:7000/routr/otp',data)
+        console.log("third",getinfo.data);
+        return getinfo.data
+        
+    } catch (error) {
+        console.log(error);
+        
+        
+    }
+}
